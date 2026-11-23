@@ -45,6 +45,13 @@ test('可以按客户名称搜索', () => {
   assert.deepEqual(result.map((record) => record.id), ['BW20261123002']);
 });
 
+test('可以按客户名称的单个字或连续片段搜索', () => {
+  for (const query of ['远', '远川', '川家', '远川家居']) {
+    const result = filterShipments(shipments, { query });
+    assert.deepEqual(result.map((record) => record.id), ['BW20261123004']);
+  }
+});
+
 test('可以按目的地搜索', () => {
   const result = filterShipments(shipments, { query: '厦门集美' });
   assert.deepEqual(result.map((record) => record.id), ['BW20261123012']);

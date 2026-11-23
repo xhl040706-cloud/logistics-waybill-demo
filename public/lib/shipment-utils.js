@@ -13,14 +13,14 @@ export function filterShipments(records, { query = '', status = '全部状态' }
     if (!matchesStatus) return false;
     if (!keyword) return true;
 
-    const searchableText = [
+    const searchableFields = [
       record.id,
       record.customer,
       record.origin,
       record.destination,
       record.owner,
-    ].map(normalizeKeyword).join('\n');
-    return searchableText.includes(keyword);
+    ];
+    return searchableFields.some((value) => normalizeKeyword(value).includes(keyword));
   });
 }
 

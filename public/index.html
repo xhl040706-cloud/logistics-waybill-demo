@@ -3,8 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="用于协同开发演示的物流运单存量项目，全部数据均为虚构。" />
-    <title>柏威物流 · 运单协同系统（模拟）</title>
+    <meta name="description" content="柏威物流运单协同系统，集中管理运单进展、运输状态与责任人。" />
+    <title>柏威物流 · 运单协同系统</title>
     <link rel="stylesheet" href="./styles.css" />
     <script type="module" src="./app.js"></script>
   </head>
@@ -19,7 +19,7 @@
       </a>
       <div class="environment-badge">
         <span class="status-dot" aria-hidden="true"></span>
-        模拟存量项目 · 虚构数据
+        运营中心
       </div>
     </header>
 
@@ -33,9 +33,9 @@
           </p>
         </div>
         <div class="baseline-card">
-          <span class="baseline-label">BASELINE V1.0</span>
-          <strong>已有系统增量演示</strong>
-          <p>本地运行，无需数据库或外部服务</p>
+          <span class="baseline-label">OPERATIONS OVERVIEW</span>
+          <strong>运输全程，清晰可追踪</strong>
+          <p>集中管理运单状态与运输节点</p>
         </div>
       </section>
 
@@ -43,7 +43,7 @@
         <article class="stat-card accent-teal">
           <p>全部运单</p>
           <strong id="stat-total">—</strong>
-          <span>当前演示运单总量</span>
+          <span>当前运单总量</span>
         </article>
         <article class="stat-card accent-blue">
           <p>进行中</p>
@@ -58,7 +58,7 @@
         <article class="stat-card accent-amber">
           <p>目的地</p>
           <strong id="stat-cities">—</strong>
-          <span>本次演示覆盖的城市区域</span>
+          <span>当前运单覆盖城市</span>
         </article>
       </section>
 
@@ -78,7 +78,7 @@
             <input
               id="search-input"
               type="search"
-              placeholder="运单号、客户、线路或负责人"
+              placeholder="输入运单号、客户、线路或负责人关键字"
               autocomplete="off"
             />
           </label>
@@ -93,7 +93,7 @@
 
         <div id="table-container" class="table-container">
           <table>
-            <caption class="sr-only">虚构运单列表，可查看每张运单的基础详情</caption>
+            <caption class="sr-only">运单列表，可查看每张运单的基础详情</caption>
             <thead>
               <tr>
                 <th scope="col">运单号</th>
@@ -119,7 +119,7 @@
     </main>
 
     <footer class="page-footer">
-      模拟存量项目 · 所有企业、人员与运单信息均为虚构，不对应真实客户数据
+      柏威物流 · 运单协同系统
     </footer>
 
     <dialog id="shipment-dialog" class="shipment-dialog" aria-labelledby="dialog-title">
@@ -131,7 +131,6 @@
         <button id="close-dialog" class="icon-button" type="button" aria-label="关闭运单详情">×</button>
       </div>
       <dl id="detail-grid" class="detail-grid"></dl>
-      <div class="dialog-note">当前为存量系统基础详情，不包含本次待开发的异常处理功能。</div>
     </dialog>
 
     <noscript>请启用 JavaScript 后使用运单搜索、筛选和详情功能。</noscript>

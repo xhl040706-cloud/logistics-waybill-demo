@@ -555,15 +555,6 @@ tbody tr:hover {
   line-height: 1.6;
 }
 
-.dialog-note {
-  margin-top: 22px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.7;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
