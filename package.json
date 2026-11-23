@@ -1,0 +1,15 @@
+{
+  "name": "logistics-waybill-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "用于 CoStrict 协同开发演示的物流运单存量项目（全部虚构数据）",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

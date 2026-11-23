@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="用于协同开发演示的物流运单存量项目，全部数据均为虚构。" />
+    <title>柏威物流 · 运单协同系统（模拟）</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./" aria-label="返回运单工作台">
+        <span class="brand-mark" aria-hidden="true">BW</span>
+        <span>
+          <strong>柏威物流</strong>
+          <small>运单协同系统</small>
+        </span>
+      </a>
+      <div class="environment-badge">
+        <span class="status-dot" aria-hidden="true"></span>
+        模拟存量项目 · 虚构数据
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">物流运营工作台</p>
+          <h1 id="page-title">让每一张运单，<br />都有清晰的去向。</h1>
+          <p class="hero-description">
+            集中查看运单进展、运输状态与责任人，帮助运营团队稳定跟进每一段旅程。
+          </p>
+        </div>
+        <div class="baseline-card">
+          <span class="baseline-label">BASELINE V1.0</span>
+          <strong>已有系统增量演示</strong>
+          <p>本地运行，无需数据库或外部服务</p>
+        </div>
+      </section>
+
+      <section class="stats-grid" aria-label="运单概览">
+        <article class="stat-card accent-teal">
+          <p>全部运单</p>
+          <strong id="stat-total">—</strong>
+          <span>当前演示运单总量</span>
+        </article>
+        <article class="stat-card accent-blue">
+          <p>进行中</p>
+          <strong id="stat-active">—</strong>
+          <span>待揽收、运输中与派送中</span>
+        </article>
+        <article class="stat-card accent-green">
+          <p>已签收</p>
+          <strong id="stat-delivered">—</strong>
+          <span>已完成整个运输流程</span>
+        </article>
+        <article class="stat-card accent-amber">
+          <p>目的地</p>
+          <strong id="stat-cities">—</strong>
+          <span>本次演示覆盖的城市区域</span>
+        </article>
+      </section>
+
+      <section class="workspace-card" aria-labelledby="list-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">运单管理</p>
+            <h2 id="list-title">运单列表</h2>
+            <p>使用现有搜索与运输状态筛选，快速定位需要跟进的运单。</p>
+          </div>
+          <span id="result-summary" class="result-summary" aria-live="polite">正在加载…</span>
+        </div>
+
+        <form id="filter-form" class="filter-bar" role="search">
+          <label class="field search-field">
+            <span>搜索运单</span>
+            <input
+              id="search-input"
+              type="search"
+              placeholder="运单号、客户、线路或负责人"
+              autocomplete="off"
+            />
+          </label>
+          <label class="field">
+            <span>运输状态</span>
+            <select id="status-filter">
+              <option value="全部状态">全部状态</option>
+            </select>
+          </label>
+          <button id="reset-filter" class="button button-secondary" type="button">重置筛选</button>
+        </form>
+
+        <div id="table-container" class="table-container">
+          <table>
+            <caption class="sr-only">虚构运单列表，可查看每张运单的基础详情</caption>
+            <thead>
+              <tr>
+                <th scope="col">运单号</th>
+                <th scope="col">客户</th>
+                <th scope="col">运输线路</th>
+                <th scope="col">运输状态</th>
+                <th scope="col">预计送达</th>
+                <th scope="col">负责人</th>
+                <th scope="col"><span class="sr-only">操作</span></th>
+              </tr>
+            </thead>
+            <tbody id="shipment-rows"></tbody>
+          </table>
+        </div>
+
+        <div id="empty-state" class="empty-state" hidden>
+          <span class="empty-symbol" aria-hidden="true">0</span>
+          <h3>没有找到匹配的运单</h3>
+          <p>请调整关键词或运输状态后重新查看。</p>
+          <button id="empty-reset" class="button button-primary" type="button">清除筛选条件</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="page-footer">
+      模拟存量项目 · 所有企业、人员与运单信息均为虚构，不对应真实客户数据
+    </footer>
+
+    <dialog id="shipment-dialog" class="shipment-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow">运单详情</p>
+          <h2 id="dialog-title">—</h2>
+        </div>
+        <button id="close-dialog" class="icon-button" type="button" aria-label="关闭运单详情">×</button>
+      </div>
+      <dl id="detail-grid" class="detail-grid"></dl>
+      <div class="dialog-note">当前为存量系统基础详情，不包含本次待开发的异常处理功能。</div>
+    </dialog>
+
+    <noscript>请启用 JavaScript 后使用运单搜索、筛选和详情功能。</noscript>
+  </body>
+</html>
