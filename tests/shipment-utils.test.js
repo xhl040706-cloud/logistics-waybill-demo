@@ -4,7 +4,9 @@ import { shipments, shipmentStatuses } from '../public/data/shipments.js';
 import {
   filterShipments,
   getDashboardStats,
+  getExceptionView,
   getShipmentById,
+  isAbnormalShipment,
   normalizeKeyword,
 } from '../public/lib/shipment-utils.js';
 
@@ -108,4 +110,116 @@ test('可以按运单号读取详情并处理不存在的运单', () => {
 test('非数组输入会返回明确错误而不是静默产生错误统计', () => {
   assert.throws(() => filterShipments(null), /records must be an array/);
   assert.throws(() => getDashboardStats(null), /records must be an array/);
+});
+
+test('异常判定只读取 exceptionType 字符串并处理边界值', () => {
+  const exceptionReason = {
+    exceptionType: '  延误  ',
+    get exceptionReason() {
+      throw new Error('exceptionReason should not be read');
+    },
+  };
+
+  assert.equal(isAbnormalShipment(exceptionReason), true);
+  for (const record of [
+    null,
+    {},
+    { exceptionType: undefined },
+    { exceptionType: null },
+    { exceptionType: '' },
+    { exceptionType: '   ' },
+    { exceptionType: 123 },
+    { exceptionType: {} },
+  ]) {
+    assert.doesNotThrow(() => isAbnormalShipment(record));
+    assert.equal(isAbnormalShipment(record), false);
+  }
+});
+
+test('异常视图只为异常记录返回新对象并降级缺失原因', () => {
+  for (const record of [
+    null,
+    {},
+    { exceptionType: undefined },
+    { exceptionType: null },
+    { exceptionType: {} },
+    { exceptionType: '' },
+    { exceptionType: '   ' },
+    { exceptionType: 123 },
+  ]) {
+    assert.doesNotThrow(() => getExceptionView(record));
+    assert.equal(getExceptionView(record), null);
+  }
+
+  const record = { exceptionType: '地址异常', exceptionReason: '  ' };
+  const first = getExceptionView(record);
+  const second = getExceptionView(record);
+  assert.deepEqual(first, { type: '地址异常', reason: '原因缺失' });
+  assert.deepEqual(second, { type: '地址异常', reason: '原因缺失' });
+  assert.notEqual(first, second);
+  assert.deepEqual(record, { exceptionType: '地址异常', exceptionReason: '  ' });
+  assert.deepEqual(getExceptionView({ exceptionType: '延误' }), {
+    type: '延误',
+    reason: '原因缺失',
+  });
+  assert.deepEqual(getExceptionView({ exceptionType: '延误', exceptionReason: null }), {
+    type: '延误',
+    reason: '原因缺失',
+  });
+  assert.deepEqual(getExceptionView({ exceptionType: '延误', exceptionReason: 42 }), {
+    type: '延误',
+    reason: '原因缺失',
+  });
+});
+
+test('仅异常筛选返回固定运单集合并保持输入顺序', () => {
+  const result = filterShipments(shipments, { abnormalOnly: true });
+  assert.deepEqual(result.map((record) => record.id), [
+    'BW20261123001',
+    'BW20261123003',
+    'BW20261123006',
+    'BW20261123008',
+  ]);
+  assert.notEqual(result, shipments);
+});
+
+test('异常筛选与关键词、状态按 AND 组合', () => {
+  assert.deepEqual(
+    filterShipments(shipments, { abnormalOnly: true, query: '林悦' }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, { abnormalOnly: true, status: '派送中' }).map((record) => record.id),
+    ['BW20261123008'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, {
+      abnormalOnly: true,
+      query: '林悦',
+      status: '运输中',
+    }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+  assert.deepEqual(filterShipments(shipments, {
+    abnormalOnly: true,
+    query: '不存在',
+  }), []);
+});
+
+test('异常筛选默认关闭且保留旧调用方式', () => {
+  assert.deepEqual(filterShipments(shipments).map((record) => record.id), shipments.map((record) => record.id));
+  assert.deepEqual(filterShipments(shipments, { abnormalOnly: false }), shipments);
+  assert.deepEqual(filterShipments(shipments, { abnormalOnly: 1 }), shipments);
+});
+
+test('筛选不修改源数组或源记录且非数组错误消息精确', () => {
+  const records = shipments.slice(0, 3).map((record) => ({ ...record }));
+  const before = structuredClone(records);
+  const result = filterShipments(records, { abnormalOnly: true });
+  assert.deepEqual(records, before);
+  assert.deepEqual(result, [records[0], records[2]]);
+  assert.throws(
+    () => filterShipments(null),
+    (error) => error instanceof TypeError && error.message === 'records must be an array',
+  );
 });
