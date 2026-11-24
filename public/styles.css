@@ -286,7 +286,7 @@ a:focus-visible {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 220px auto;
+  grid-template-columns: minmax(220px, 1fr) 180px 220px auto;
   align-items: end;
   gap: 14px;
   padding: 18px;
@@ -301,7 +301,8 @@ a:focus-visible {
   gap: 8px;
 }
 
-.field > span {
+.field > span,
+.field > label {
   color: var(--muted);
   font-size: 12px;
   font-weight: 650;

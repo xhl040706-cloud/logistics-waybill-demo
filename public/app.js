@@ -1,14 +1,17 @@
 import { shipments, shipmentStatuses } from './data/shipments.js';
 import {
+  DEFAULT_SORT_MODE,
   filterShipments,
   getDashboardStats,
   getShipmentById,
+  sortShipmentsByEta,
 } from './lib/shipment-utils.js';
 
 const elements = {
   form: document.querySelector('#filter-form'),
   search: document.querySelector('#search-input'),
   status: document.querySelector('#status-filter'),
+  sortMode: document.querySelector('#sort-mode'),
   reset: document.querySelector('#reset-filter'),
   emptyReset: document.querySelector('#empty-reset'),
   rows: document.querySelector('#shipment-rows'),
@@ -112,16 +115,18 @@ function renderShipments() {
     query: elements.search.value,
     status: elements.status.value,
   });
+  const sorted = sortShipmentsByEta(filtered, elements.sortMode.value);
 
-  elements.rows.replaceChildren(...filtered.map(createShipmentRow));
-  elements.summary.textContent = `显示 ${filtered.length} / ${shipments.length} 张运单`;
-  elements.table.hidden = filtered.length === 0;
-  elements.empty.hidden = filtered.length > 0;
+  elements.rows.replaceChildren(...sorted.map(createShipmentRow));
+  elements.summary.textContent = `显示 ${sorted.length} / ${shipments.length} 张运单`;
+  elements.table.hidden = sorted.length === 0;
+  elements.empty.hidden = sorted.length > 0;
 }
 
 function resetFilters() {
   elements.search.value = '';
   elements.status.value = '全部状态';
+  elements.sortMode.value = DEFAULT_SORT_MODE;
   renderShipments();
   elements.search.focus();
 }
@@ -154,6 +159,7 @@ function openShipmentDetail(id) {
 elements.form.addEventListener('submit', (event) => event.preventDefault());
 elements.search.addEventListener('input', renderShipments);
 elements.status.addEventListener('change', renderShipments);
+elements.sortMode.addEventListener('change', renderShipments);
 elements.reset.addEventListener('click', resetFilters);
 elements.emptyReset.addEventListener('click', resetFilters);
 elements.closeDialog.addEventListener('click', () => elements.dialog.close());

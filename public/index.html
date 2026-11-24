@@ -88,6 +88,14 @@
               <option value="全部状态">全部状态</option>
             </select>
           </label>
+          <div class="field">
+            <label for="sort-mode">排序方式</label>
+            <select id="sort-mode" name="sort-mode">
+              <option value="default" selected>默认排序</option>
+              <option value="eta-asc">预计送达最早优先</option>
+              <option value="eta-desc">预计送达最晚优先</option>
+            </select>
+          </div>
           <button id="reset-filter" class="button button-secondary" type="button">重置筛选</button>
         </form>
 
