@@ -67,7 +67,7 @@
           <div>
             <p class="eyebrow">运单管理</p>
             <h2 id="list-title">运单列表</h2>
-            <p>使用现有搜索与运输状态筛选，快速定位需要跟进的运单。</p>
+            <p>组合关键词、运输状态与异常条件，快速定位需要跟进的运单。</p>
           </div>
           <span id="result-summary" class="result-summary" aria-live="polite">正在加载…</span>
         </div>
@@ -80,20 +80,30 @@
               type="search"
               placeholder="输入运单号、客户、线路或负责人关键字"
               autocomplete="off"
+              disabled
             />
           </label>
           <label class="field">
             <span>运输状态</span>
-            <select id="status-filter">
+            <select id="status-filter" disabled>
               <option value="全部状态">全部状态</option>
             </select>
           </label>
-          <button id="reset-filter" class="button button-secondary" type="button">重置筛选</button>
+          <label class="exception-toggle">
+            <input id="exception-filter" type="checkbox" disabled />
+            <span class="exception-toggle-copy">
+              <strong>仅看异常运单</strong>
+              <small>只显示存在异常类型与原因的运单</small>
+            </span>
+          </label>
+          <button id="reset-filter" class="button button-secondary" type="button" disabled>重置筛选</button>
         </form>
 
-        <div id="table-container" class="table-container">
+        <p id="page-feedback" class="page-feedback" role="status" hidden></p>
+
+        <div id="table-container" class="table-container" hidden>
           <table>
-            <caption class="sr-only">运单列表，可查看每张运单的基础详情</caption>
+            <caption class="sr-only">运单列表，可筛选并查看异常信息与运单详情</caption>
             <thead>
               <tr>
                 <th scope="col">运单号</th>
@@ -111,9 +121,9 @@
 
         <div id="empty-state" class="empty-state" hidden>
           <span class="empty-symbol" aria-hidden="true">0</span>
-          <h3>没有找到匹配的运单</h3>
-          <p>请调整关键词或运输状态后重新查看。</p>
-          <button id="empty-reset" class="button button-primary" type="button">清除筛选条件</button>
+          <h3 id="empty-title">没有符合条件的运单</h3>
+          <p id="empty-description">请调整关键词、运输状态或异常条件后重新查看。</p>
+          <button id="empty-reset" class="button button-primary" type="button" disabled>清除筛选条件</button>
         </div>
       </section>
     </main>

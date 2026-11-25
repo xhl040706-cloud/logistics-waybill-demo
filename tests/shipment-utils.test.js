@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { shipments, shipmentStatuses } from '../public/data/shipments.js';
 import {
   filterShipments,
+  formatExceptionReason,
   getDashboardStats,
   getShipmentById,
+  isExceptionShipment,
   normalizeKeyword,
 } from '../public/lib/shipment-utils.js';
 
@@ -108,4 +110,104 @@ test('可以按运单号读取详情并处理不存在的运单', () => {
 test('非数组输入会返回明确错误而不是静默产生错误统计', () => {
   assert.throws(() => filterShipments(null), /records must be an array/);
   assert.throws(() => getDashboardStats(null), /records must be an array/);
+});
+
+test('仅看异常运单返回四个固定 ID', () => {
+  const result = filterShipments(shipments, { exceptionOnly: true });
+  assert.deepEqual(result.map((record) => record.id), [
+    'BW20261123001',
+    'BW20261123003',
+    'BW20261123006',
+    'BW20261123008',
+  ]);
+});
+
+test('异常条件与关键词、状态按交集组合', () => {
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, query: '林悦' }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, status: '派送中' }).map((record) => record.id),
+    ['BW20261123008'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, {
+      exceptionOnly: true,
+      query: '林悦',
+      status: '运输中',
+    }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+});
+
+test('异常条件默认关闭且不修改入参与记录', () => {
+  const originalIds = shipments.map((record) => record.id);
+  const originalFirst = { ...shipments[0] };
+  const result = filterShipments(shipments, { query: '', status: '全部状态' });
+  assert.equal(result.length, 12);
+  assert.notEqual(result, shipments);
+  assert.deepEqual(shipments.map((record) => record.id), originalIds);
+  assert.deepEqual(shipments[0], originalFirst);
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: false }).map((record) => record.id),
+    originalIds,
+  );
+});
+
+test('异常条件无匹配时返回空数组', () => {
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, query: '不存在的异常运单' }),
+    [],
+  );
+});
+
+test('异常类型仅接受去除首尾空白后非空的字符串', () => {
+  assert.equal(isExceptionShipment({ exceptionType: '延误' }), true);
+  assert.equal(isExceptionShipment({ exceptionType: '  延误  ' }), true);
+  for (const exceptionType of ['', '   ', null, undefined, 1, {}, []]) {
+    assert.equal(isExceptionShipment({ exceptionType }), false);
+  }
+  assert.equal(isExceptionShipment({}), false);
+  assert.equal(isExceptionShipment(null), false);
+  assert.equal(isExceptionShipment(undefined), false);
+});
+
+test('异常判定不修改记录', () => {
+  const record = { exceptionType: ' 延误 ', exceptionReason: '原因' };
+  isExceptionShipment(record);
+  assert.deepEqual(record, { exceptionType: ' 延误 ', exceptionReason: '原因' });
+});
+
+test('异常原因保留非空字符串原文并回退缺失文案', () => {
+  assert.equal(formatExceptionReason({ exceptionReason: '原因' }), '原因');
+  assert.equal(formatExceptionReason({ exceptionReason: '  原因  ' }), '  原因  ');
+  for (const exceptionReason of ['', '   ', null, undefined, 1, {}, []]) {
+    assert.equal(formatExceptionReason({ exceptionReason }), '原因缺失');
+  }
+  assert.equal(formatExceptionReason({}), '原因缺失');
+  assert.equal(formatExceptionReason(null), '原因缺失');
+});
+
+test('恶意异常原因按普通文本返回且不执行', () => {
+  const payload = '<img src=x onerror=alert(1)>';
+  assert.equal(formatExceptionReason({ exceptionReason: payload }), payload);
+});
+
+test('normalizeKeyword 保持旧签名和返回值语义', () => {
+  assert.equal(normalizeKeyword(), '');
+  assert.equal(normalizeKeyword(''), '');
+  assert.equal(normalizeKeyword('   '), '');
+  assert.equal(normalizeKeyword('  ABC  '), 'abc');
+  assert.equal(typeof normalizeKeyword(123), 'string');
+});
+
+test('getShipmentById 返回首个同 ID 对象并拒绝非数组', () => {
+  const duplicated = [
+    { id: 'BW1', customer: '首个' },
+    { id: 'BW1', customer: '第二个' },
+  ];
+  assert.equal(getShipmentById(duplicated, 'BW1'), duplicated[0]);
+  assert.equal(getShipmentById(duplicated, 'missing'), undefined);
+  assert.throws(() => getShipmentById(null, 'BW1'), /records must be an array/);
 });
