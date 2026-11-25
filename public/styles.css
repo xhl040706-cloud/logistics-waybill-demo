@@ -276,17 +276,19 @@ a:focus-visible {
 
 .result-summary {
   flex: 0 0 auto;
+  max-width: 100%;
   padding: 8px 12px;
   border-radius: 999px;
   background: var(--teal-soft);
   color: var(--teal-dark);
   font-size: 12px;
   font-weight: 650;
+  line-height: 1.5;
 }
 
 .filter-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 220px auto;
+  grid-template-columns: minmax(220px, 1fr) 180px minmax(190px, auto) auto;
   align-items: end;
   gap: 14px;
   padding: 18px;
@@ -322,6 +324,65 @@ a:focus-visible {
   color: #8ca09c;
 }
 
+.field input:disabled,
+.field select:disabled {
+  cursor: not-allowed;
+  background: #f1f5f3;
+  color: #80928f;
+}
+
+.exception-toggle {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid #ccdcd7;
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.exception-toggle:has(input:focus-visible) {
+  outline: 3px solid rgb(15 118 110 / 22%);
+  outline-offset: 3px;
+}
+
+.exception-toggle:has(input:checked) {
+  border-color: #daa47e;
+  background: #fff8f1;
+}
+
+.exception-toggle:has(input:disabled) {
+  cursor: not-allowed;
+  background: #f1f5f3;
+}
+
+.exception-toggle input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin: 0;
+  accent-color: var(--amber);
+}
+
+.exception-toggle-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.exception-toggle-copy strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.exception-toggle-copy small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 .button {
   min-height: 44px;
   padding: 0 17px;
@@ -348,6 +409,22 @@ a:focus-visible {
 
 .button-secondary:hover {
   background: var(--teal-soft);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.page-feedback {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border: 1px solid #edc6ad;
+  border-radius: 10px;
+  background: #fff8f1;
+  color: #8b431b;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .table-container {
@@ -432,6 +509,40 @@ tbody tr:hover {
 .status-delivered { background: var(--green-soft); color: var(--green); }
 .status-pending { background: #edf1ef; color: #5d716d; }
 
+.status-cell {
+  min-width: 210px;
+}
+
+.exception-summary {
+  max-width: 240px;
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid #f0ddd0;
+}
+
+.exception-type {
+  display: inline-flex;
+  padding: 3px 7px;
+  border-radius: 6px;
+  background: #fff0e7;
+  color: #9a4b20;
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.exception-reason {
+  display: -webkit-box;
+  margin: 6px 0 0;
+  overflow: hidden;
+  color: #6f615a;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .owner {
   white-space: nowrap;
 }
@@ -489,7 +600,9 @@ tbody tr:hover {
 
 .shipment-dialog {
   width: min(620px, calc(100% - 32px));
+  max-height: min(86vh, 900px);
   padding: 28px;
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 20px;
   color: var(--ink);
@@ -555,6 +668,19 @@ tbody tr:hover {
   line-height: 1.6;
 }
 
+.detail-grid .detail-exception {
+  background: #fff8f1;
+}
+
+.detail-grid .detail-exception-reason {
+  grid-column: 1 / -1;
+}
+
+.detail-grid .detail-exception-reason dd {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -592,6 +718,10 @@ tbody tr:hover {
 
   .search-field {
     grid-column: 1 / -1;
+  }
+
+  .exception-toggle {
+    align-self: stretch;
   }
 }
 
@@ -673,7 +803,12 @@ tbody tr:hover {
     gap: 10px;
   }
 
+  .detail-grid .detail-exception-reason {
+    grid-column: auto;
+  }
+
   .shipment-dialog {
+    max-height: 90vh;
     padding: 20px;
   }
 }
