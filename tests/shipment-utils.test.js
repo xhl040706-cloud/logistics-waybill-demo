@@ -4,7 +4,9 @@ import { shipments, shipmentStatuses } from '../public/data/shipments.js';
 import {
   filterShipments,
   getDashboardStats,
+  getExceptionDisplay,
   getShipmentById,
+  isExceptionShipment,
   normalizeKeyword,
 } from '../public/lib/shipment-utils.js';
 
@@ -108,4 +110,113 @@ test('可以按运单号读取详情并处理不存在的运单', () => {
 test('非数组输入会返回明确错误而不是静默产生错误统计', () => {
   assert.throws(() => filterShipments(null), /records must be an array/);
   assert.throws(() => getDashboardStats(null), /records must be an array/);
+});
+
+test('仅将以非空字符串异常类型标识的运单判定为异常', () => {
+  assert.equal(isExceptionShipment({ exceptionType: '延误' }), true);
+  assert.equal(isExceptionShipment({ exceptionType: '  联系不上  ' }), true);
+
+  const invalidRecords = [
+    null,
+    undefined,
+    'BW20261123001',
+    {},
+    { exceptionType: '' },
+    { exceptionType: '   ' },
+    { exceptionType: '\t\n' },
+    { exceptionType: null },
+    { exceptionType: undefined },
+    { exceptionType: 1 },
+    { exceptionType: {} },
+  ];
+  for (const record of invalidRecords) {
+    assert.equal(isExceptionShipment(record), false);
+  }
+});
+
+test('异常展示值返回去空白类型与原始原因且不修改记录', () => {
+  const record = {
+    id: 'TEST-001',
+    exceptionType: '  包装破损  ',
+    exceptionReason: '  外箱破损，需现场复核  ',
+  };
+  const snapshot = structuredClone(record);
+
+  assert.deepEqual(getExceptionDisplay(record), {
+    type: '包装破损',
+    reason: '  外箱破损，需现场复核  ',
+  });
+  assert.deepEqual(record, snapshot);
+  assert.equal(getExceptionDisplay({ exceptionType: '  ' }), null);
+});
+
+test('异常原因为非字符串或空白时统一显示原因缺失', () => {
+  for (const exceptionReason of ['', '   ', null, undefined, 1, {}]) {
+    assert.deepEqual(getExceptionDisplay({ exceptionType: '延误', exceptionReason }), {
+      type: '延误',
+      reason: '原因缺失',
+    });
+  }
+});
+
+test('仅看异常运单返回固定四条结果并保持基准顺序', () => {
+  const result = filterShipments(shipments, { exceptionOnly: true });
+  assert.deepEqual(result.map((record) => record.id), [
+    'BW20261123001',
+    'BW20261123003',
+    'BW20261123006',
+    'BW20261123008',
+  ]);
+});
+
+test('异常条件与关键词和运输状态按逻辑与组合', () => {
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, status: '派送中' }).map((record) => record.id),
+    ['BW20261123008'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, status: '运输中' }).map((record) => record.id),
+    ['BW20261123001', 'BW20261123003', 'BW20261123006'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, {
+      exceptionOnly: true,
+      query: '林悦',
+      status: '运输中',
+    }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, status: '已签收' }),
+    [],
+  );
+});
+
+test('异常筛选项默认关闭、兼容旧调用并返回独立数组', () => {
+  const expectedIds = shipments.map((record) => record.id);
+  const snapshots = structuredClone(shipments);
+  const calls = [
+    filterShipments(shipments),
+    filterShipments(shipments, { exceptionOnly: false }),
+    filterShipments(shipments, { exceptionOnly: null }),
+    filterShipments(shipments, { exceptionOnly: undefined }),
+  ];
+
+  for (const result of calls) {
+    assert.notEqual(result, shipments);
+    assert.deepEqual(result.map((record) => record.id), expectedIds);
+  }
+  assert.deepEqual(filterShipments(shipments, { exceptionOnly: true }), filterShipments(shipments, { exceptionOnly: true }));
+  assert.deepEqual(shipments, snapshots);
+});
+
+test('异常筛选的空数组与非数组边界符合共享契约', () => {
+  assert.deepEqual(filterShipments([]), []);
+  assert.deepEqual(filterShipments([], { exceptionOnly: true }), []);
+  for (const invalidRecords of [null, {}, 'x']) {
+    assert.throws(
+      () => filterShipments(invalidRecords),
+      (error) => error instanceof TypeError && error.message === 'records must be an array',
+    );
+  }
 });
