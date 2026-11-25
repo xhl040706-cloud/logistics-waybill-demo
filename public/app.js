@@ -2,6 +2,7 @@ import { shipments, shipmentStatuses } from './data/shipments.js';
 import {
   filterShipments,
   getDashboardStats,
+  getExceptionDisplay,
   getShipmentById,
 } from './lib/shipment-utils.js';
 
@@ -9,6 +10,7 @@ const elements = {
   form: document.querySelector('#filter-form'),
   search: document.querySelector('#search-input'),
   status: document.querySelector('#status-filter'),
+  exception: document.querySelector('#exception-filter'),
   reset: document.querySelector('#reset-filter'),
   emptyReset: document.querySelector('#empty-reset'),
   rows: document.querySelector('#shipment-rows'),
@@ -77,6 +79,22 @@ function createStatusCell(row, status) {
   row.append(cell);
 }
 
+function createExceptionCell(row, record) {
+  const cell = document.createElement('td');
+  cell.className = 'exception-cell';
+  const display = getExceptionDisplay(record);
+  if (display) {
+    const type = document.createElement('span');
+    type.className = 'exception-type';
+    type.textContent = display.type;
+    const reason = document.createElement('span');
+    reason.className = 'exception-reason';
+    reason.textContent = display.reason;
+    cell.append(type, reason);
+  }
+  row.append(cell);
+}
+
 function createDetailButton(record) {
   const button = document.createElement('button');
   button.type = 'button';
@@ -93,6 +111,7 @@ function createShipmentRow(record) {
   appendTextCell(row, record.customer, 'customer-name');
   createRouteCell(row, record);
   createStatusCell(row, record.status);
+  createExceptionCell(row, record);
 
   const eta = appendTextCell(row, record.eta);
   const time = document.createElement('time');
@@ -111,6 +130,7 @@ function renderShipments() {
   const filtered = filterShipments(shipments, {
     query: elements.search.value,
     status: elements.status.value,
+    exceptionOnly: elements.exception.checked,
   });
 
   elements.rows.replaceChildren(...filtered.map(createShipmentRow));
@@ -122,6 +142,7 @@ function renderShipments() {
 function resetFilters() {
   elements.search.value = '';
   elements.status.value = '全部状态';
+  elements.exception.checked = false;
   renderShipments();
   elements.search.focus();
 }
@@ -144,6 +165,11 @@ function openShipmentDetail(id) {
   elements.detailGrid.replaceChildren();
   addDetailItem('客户', record.customer);
   addDetailItem('运输状态', record.status);
+  const exception = getExceptionDisplay(record);
+  if (exception) {
+    addDetailItem('异常类型', exception.type);
+    addDetailItem('异常原因', exception.reason);
+  }
   addDetailItem('运输线路', `${record.origin} → ${record.destination}`);
   addDetailItem('预计送达', record.eta);
   addDetailItem('负责人', record.owner);
@@ -154,6 +180,7 @@ function openShipmentDetail(id) {
 elements.form.addEventListener('submit', (event) => event.preventDefault());
 elements.search.addEventListener('input', renderShipments);
 elements.status.addEventListener('change', renderShipments);
+elements.exception.addEventListener('change', renderShipments);
 elements.reset.addEventListener('click', resetFilters);
 elements.emptyReset.addEventListener('click', resetFilters);
 elements.closeDialog.addEventListener('click', () => elements.dialog.close());

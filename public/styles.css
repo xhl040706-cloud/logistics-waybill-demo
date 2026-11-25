@@ -286,7 +286,7 @@ a:focus-visible {
 
 .filter-bar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) 220px auto;
+  grid-template-columns: minmax(220px, 1fr) 220px auto auto;
   align-items: end;
   gap: 14px;
   padding: 18px;
@@ -320,6 +320,25 @@ a:focus-visible {
 
 .field input::placeholder {
   color: #8ca09c;
+}
+
+.field.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #ccdcd7;
+  border-radius: 10px;
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+.checkbox-field input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--teal);
 }
 
 .button {
@@ -359,7 +378,7 @@ a:focus-visible {
 
 table {
   width: 100%;
-  min-width: 890px;
+  min-width: 1110px;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -432,6 +451,32 @@ tbody tr:hover {
 .status-delivered { background: var(--green-soft); color: var(--green); }
 .status-pending { background: #edf1ef; color: #5d716d; }
 
+.exception-cell {
+  min-width: 220px;
+  vertical-align: top;
+}
+
+.exception-type {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff1dc;
+  color: #9a5b00;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.exception-reason {
+  display: block;
+  max-width: 280px;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .owner {
   white-space: nowrap;
 }
@@ -489,7 +534,9 @@ tbody tr:hover {
 
 .shipment-dialog {
   width: min(620px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
   padding: 28px;
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 20px;
   color: var(--ink);
@@ -553,6 +600,7 @@ tbody tr:hover {
   margin: 0;
   font-size: 14px;
   line-height: 1.6;
+  overflow-wrap: anywhere;
 }
 
 .sr-only {
@@ -588,9 +636,11 @@ tbody tr:hover {
 
   .filter-bar {
     grid-template-columns: 1fr 1fr;
+    grid-auto-flow: dense;
   }
 
-  .search-field {
+  .search-field,
+  .checkbox-field {
     grid-column: 1 / -1;
   }
 }
@@ -660,7 +710,8 @@ tbody tr:hover {
     padding: 14px;
   }
 
-  .search-field {
+  .search-field,
+  .checkbox-field {
     grid-column: auto;
   }
 

@@ -67,7 +67,7 @@
           <div>
             <p class="eyebrow">运单管理</p>
             <h2 id="list-title">运单列表</h2>
-            <p>使用现有搜索与运输状态筛选，快速定位需要跟进的运单。</p>
+            <p>组合搜索、运输状态与异常筛选，快速定位需要跟进的运单。</p>
           </div>
           <span id="result-summary" class="result-summary" aria-live="polite">正在加载…</span>
         </div>
@@ -88,18 +88,23 @@
               <option value="全部状态">全部状态</option>
             </select>
           </label>
+          <label class="field checkbox-field">
+            <input id="exception-filter" type="checkbox" name="exception" />
+            <span>仅看异常运单</span>
+          </label>
           <button id="reset-filter" class="button button-secondary" type="button">重置筛选</button>
         </form>
 
         <div id="table-container" class="table-container">
           <table>
-            <caption class="sr-only">运单列表，可查看每张运单的基础详情</caption>
+            <caption class="sr-only">运单列表，可查看异常信息与每张运单详情</caption>
             <thead>
               <tr>
                 <th scope="col">运单号</th>
                 <th scope="col">客户</th>
                 <th scope="col">运输线路</th>
                 <th scope="col">运输状态</th>
+                <th scope="col">异常信息</th>
                 <th scope="col">预计送达</th>
                 <th scope="col">负责人</th>
                 <th scope="col"><span class="sr-only">操作</span></th>
@@ -112,7 +117,7 @@
         <div id="empty-state" class="empty-state" hidden>
           <span class="empty-symbol" aria-hidden="true">0</span>
           <h3>没有找到匹配的运单</h3>
-          <p>请调整关键词或运输状态后重新查看。</p>
+          <p>请调整关键词、运输状态或异常筛选后重新查看。</p>
           <button id="empty-reset" class="button button-primary" type="button">清除筛选条件</button>
         </div>
       </section>
