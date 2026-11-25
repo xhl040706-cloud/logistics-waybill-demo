@@ -192,6 +192,59 @@ test('异常条件与关键词和运输状态按逻辑与组合', () => {
   );
 });
 
+test('仅看异常可与关键词独立组合且不误标非异常记录', () => {
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, query: '林悦' }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+  assert.deepEqual(
+    filterShipments(shipments, {
+      exceptionOnly: true,
+      query: '林悦',
+      status: '全部状态',
+    }).map((record) => record.id),
+    ['BW20261123006'],
+  );
+
+  const keywordHits = filterShipments(shipments, { query: '林悦' }).map((record) => record.id);
+  assert.deepEqual(keywordHits, ['BW20261123002', 'BW20261123006', 'BW20261123012']);
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, query: '云帆' }),
+    [],
+    '仅命中非异常客户的关键词不应被误标为异常',
+  );
+  assert.deepEqual(
+    filterShipments(shipments, { exceptionOnly: true, query: '陈晨' }).map((record) => record.id),
+    ['BW20261123001'],
+  );
+});
+
+test('异常筛选结果与按 ID 读取的详情异常字段逐字一致', () => {
+  const expected = [
+    ['BW20261123001', '延误', '枢纽短时拥堵，预计比承诺时间晚 1 天送达。'],
+    ['BW20261123003', '包装破损', '到件扫描发现外包装破损，等待网点复核并联系客户。'],
+    ['BW20261123006', '地址异常', '收件地址缺少门牌号，需运营联系客户补充后再安排派送。'],
+    ['BW20261123008', '联系不上', '两次联系收件人均未接通，等待客户确认方便收件的时间。'],
+  ];
+  const filtered = filterShipments(shipments, { exceptionOnly: true });
+
+  assert.equal(filtered.length, expected.length);
+  assert.deepEqual(filtered.map((record) => record.id), expected.map(([id]) => id));
+  for (const [id, type, reason] of expected) {
+    const fromList = filtered.find((record) => record.id === id);
+    const fromDetail = getShipmentById(shipments, id);
+    const fromSource = shipments.find((record) => record.id === id);
+
+    assert.equal(fromList.exceptionType, type);
+    assert.equal(fromList.exceptionReason, reason);
+    assert.equal(fromDetail.exceptionType, fromList.exceptionType);
+    assert.equal(fromDetail.exceptionReason, fromList.exceptionReason);
+    assert.equal(fromDetail.exceptionType, fromSource.exceptionType);
+    assert.equal(fromDetail.exceptionReason, fromSource.exceptionReason);
+    assert.deepEqual(getExceptionDisplay(fromList), getExceptionDisplay(fromDetail));
+  }
+});
+
 test('异常筛选项默认关闭、兼容旧调用并返回独立数组', () => {
   const expectedIds = shipments.map((record) => record.id);
   const snapshots = structuredClone(shipments);
